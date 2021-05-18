@@ -1,86 +1,90 @@
+import 'package:expenses/Widgets/new_transaction.dart';
 import 'package:flutter/material.dart';
-import './result.dart';
-import './quiz.dart';
+import './transaction.dart';
+import 'Widgets/transaction_list.dart';
 
 void main() => runApp(MyApp());
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   @override
-  State<StatefulWidget> createState() {
-    // TODO: implement createState
-    return _MyAppState();
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Expenses App',
+      home: MyHomePage(),
+    );
   }
 }
 
-class _MyAppState extends State {
-  var _questionIndex = 0;
-  var _totalScore = 0;
-  var _question = [
-    {
-      'questionText': 'IIT Kanpur was established in__',
-      'options': [
-        {'text': '1949', 'score': 0},
-        {'text': '1959', 'score': 1},
-        {'text': '1951', 'score': 0},
-        {'text': '1947', 'score': 0}
-      ]
-    },
-    {
-      'questionText': 'What is IIT Kanpur\'s online portal called?',
-      'options': [
-        {'text': 'Gradescope', 'score': 0},
-        {'text': 'CodeTantra', 'score': 0},
-        {'text': 'Turnitin', 'score': 0},
-        {'text': 'HelloIITK', 'score': 1}
-      ]
-    },
-    {
-      'questionText': 'Which is the best club IITK?',
-      'options': [
-        {'text': 'DClub', 'score': 0},
-        {'text': 'PClub', 'score': 1},
-        {'text': 'ELS', 'score': 0},
-        {'text': 'RClub', 'score': 0}
-      ]
-    },
-    {
-      'questionText': 'Am I selected?',
-      'options': [
-        {'text': 'yes', 'score': 1},
-        {'text': 'chill hai', 'score': 0},
-        {'text': 'will think', 'score': 0},
-        {'text': 'no', 'score': 0}
-      ]
-    }
+class MyHomePage extends StatefulWidget {
+  @override
+  _MyHomePageState createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  final List<Transaction> _userTransactions = [
+    Transaction(
+      id: DateTime.now().toString(),
+      title: 'Sample Transaction',
+      amount: 00.00,
+      date: DateTime.now(),
+    ),
   ];
-  void _answerQuestion(int score) {
-    _totalScore += score;
+
+  void _addNewTransaction(String title, double amount) {
+    final newTx = Transaction(
+      title: title,
+      amount: amount,
+      date: DateTime.now(),
+      id: DateTime.now().toString(),
+    );
     setState(() {
-      if (_questionIndex < _question.length) {
-        _questionIndex++;
-      }
+      _userTransactions.add(newTx);
     });
   }
 
-  void _resetQuiz() {
-    setState(() {
-      _questionIndex = 0;
-
-      _totalScore = 0;
-    });
+  void _popNewTransaction(BuildContext ctx) {
+    showModalBottomSheet(
+        context: ctx,
+        builder: (_) {
+          return NewTransaction(_addNewTransaction);
+        });
   }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-          appBar: AppBar(
-            title: Text('The Game of Blocks'),
-            centerTitle: true,
-          ),
-          body: _questionIndex < _question.length
-              ? Quiz(_answerQuestion, _question, _questionIndex)
-              : Result(_totalScore, _resetQuiz)),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Flutter App'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.add),
+            onPressed: () => _popNewTransaction(context),
+          )
+        ],
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Container(
+              width: double.infinity,
+              child: Card(
+                color: Colors.blue,
+                child: Text(
+                  'chart',
+                  textAlign: TextAlign.center,
+                ),
+                elevation: 15,
+              ),
+            ),
+            TransactionList(_userTransactions),
+          ],
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.add),
+        onPressed: () => _popNewTransaction(context),
+      ),
     );
   }
 }
